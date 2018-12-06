@@ -9,7 +9,7 @@ object Main {
     @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
+        //teil1()
         teil2()
     }
 
@@ -39,7 +39,7 @@ object Main {
                     .sumBy { p -> (Math.abs(coord.x - p.x) + Math.abs(coord.y - p.y)) }
         }
 
-        val withinSize = grid.flatten().filter{coord -> (coord.sumDist < threshold)}.size - 4 // why -4 ??
+        val withinSize = grid.flatten().filter{coord -> (coord.sumDist < threshold)}.size
 
         // print map
         for (row in grid) {
