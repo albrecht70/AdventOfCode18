@@ -1,6 +1,4 @@
-import java.io.File
-
-object Main {
+object Day08 {
 
     @Throws(Exception::class)
     @JvmStatic
@@ -22,9 +20,8 @@ object Main {
     private fun teil1u2() {
         val nodes = ArrayList<Node>()
 
-        //val file = File("day08-test.txt")
-        val file = File("day08-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day08/input.txt")
+            .bufferedReader().forEachLine {
             val input = it.split(" ").map { it -> (it.toInt()) }
             val node = parseRec(input, 0, nodes)
             println("Root value: " + node.value)

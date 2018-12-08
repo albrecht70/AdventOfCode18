@@ -2,7 +2,7 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-object Main {
+object Day04 {
 
     @Throws(Exception::class)
     @JvmStatic
@@ -76,9 +76,8 @@ object Main {
     private fun getSleepEvents(): ArrayList<SleepEvent> {
         var events = ArrayList<TimeEvent>()
 
-        //val file = File("day04-test.txt")
-        val file = File("day04-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day04/input.txt")
+            .bufferedReader().forEachLine {
             val timestamp = LocalDateTime.parse(
                     it.substring(1, it.indexOf(']')),
                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))

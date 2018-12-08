@@ -1,6 +1,4 @@
-import java.io.File
-
-object Main {
+object Day03 {
 
     @Throws(Exception::class)
     @JvmStatic
@@ -13,11 +11,10 @@ object Main {
     private fun teil2() {
         var maxSize = 1000
         var ids = ArrayList<String>()
-        var fabric = Array(maxSize, {Array<ArrayList<String>>(maxSize, { ArrayList<String>() }) })
+        var fabric = Array(maxSize, {Array(maxSize, { ArrayList<String>() }) })
 
-        //val file = File("day03-test.txt")
-        val file = File("day03-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day03/input.txt")
+            .bufferedReader().forEachLine {
             val idx1 = it.indexOf('@')
             val idx2 = it.indexOf(',')
             val idx3 = it.indexOf(':')
@@ -59,9 +56,8 @@ object Main {
         val maxSize = 1000
         var fabric = Array(maxSize, {IntArray(maxSize)})
 
-        //val file = File("day03-test.txt")
-        val file = File("day03-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day03/input.txt")
+            .bufferedReader().forEachLine {
             val idx1 = it.indexOf('@')
             val idx2 = it.indexOf(',')
             val idx3 = it.indexOf(':')

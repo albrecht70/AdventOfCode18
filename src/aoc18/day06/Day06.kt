@@ -1,15 +1,11 @@
-import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
-object Main {
+object Day06 {
     var dim = 358
     var threshold = 10000
 
     @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        //teil1()
+        teil1()
         teil2()
     }
 
@@ -22,9 +18,8 @@ object Main {
         var pointId = 1
         var grid = Array(dim, { val yInd = it;Array(dim, { Coord2(it, yInd)}) })
 
-        //val file = File("day06-test.txt")
-        val file = File("day06-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day06/input.txt")
+            .bufferedReader().forEachLine {
             val idx = it.indexOf(',')
             val x = it.substring(0,idx).toInt()
             val y = it.substring(idx+2).toInt()
@@ -60,9 +55,8 @@ object Main {
         var pointId = 1
         var grid = Array(dim, { val yInd = it;Array(dim, { Coord(it, yInd)}) })
 
-        //val file = File("day06-test.txt")
-        val file = File("day06-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day06/input.txt")
+            .bufferedReader().forEachLine {
             val idx = it.indexOf(',')
             val x = it.substring(0,idx).toInt()
             val y = it.substring(idx+2).toInt()

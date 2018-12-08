@@ -1,8 +1,4 @@
-import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
-object Main {
+object Day05 {
 
     private var charDiff = 'a'.toInt() - 'A'.toInt()
 
@@ -16,9 +12,8 @@ object Main {
     @Throws(Exception::class)
     private fun teil2() {
 
-        //val file = File("day05-test.txt")
-        val file = File("day05-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day05/input.txt")
+            .bufferedReader().forEachLine {
 
             var minCount = Int.MAX_VALUE
             for (ch in 'a'.toInt()..'z'.toInt()) {
@@ -40,9 +35,8 @@ object Main {
     @Throws(Exception::class)
     private fun teil1() {
 
-        //val file = File("day05-test.txt")
-        val file = File("day05-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day05/input.txt")
+            .bufferedReader().forEachLine {
             var currInput = ""
             var nextInput = it
             while (!currInput.equals(nextInput)) {

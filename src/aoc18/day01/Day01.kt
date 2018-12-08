@@ -1,7 +1,6 @@
-import java.io.File
 import java.util.*
 
-object Main {
+object Day01 {
 
     @Throws(Exception::class)
     @JvmStatic
@@ -13,8 +12,9 @@ object Main {
         var found = false;
         while (!found) {
 
-            val file = File("day01-input.txt")
-            file.forEachLine {
+            this.javaClass.getResourceAsStream("aoc18/day01/input.txt")
+                .bufferedReader().forEachLine {
+
                 sum += Integer.parseInt(it)
                 pos++
                 //println("pos/sum: $pos / $sum")

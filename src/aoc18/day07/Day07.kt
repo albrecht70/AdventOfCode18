@@ -1,8 +1,4 @@
-import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
-object Main {
+object Day07 {
 
     @Throws(Exception::class)
     @JvmStatic
@@ -24,9 +20,8 @@ object Main {
 
         val nodes = ArrayList<Node>()
 
-        //val file = File("day07-test.txt")
-        val file = File("day07-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day07/input.txt")
+            .bufferedReader().forEachLine {
             val nodeFrom = it[5].toString()
             val nodeTo = it[36].toString()
 
@@ -92,9 +87,8 @@ object Main {
 
         val nodes = ArrayList<Node>()
 
-        //val file = File("day07-test.txt")
-        val file = File("day07-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day07/input.txt")
+            .bufferedReader().forEachLine {
             val nodeFrom = it[5].toString()
             val nodeTo = it[36].toString()
 

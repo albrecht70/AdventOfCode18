@@ -1,7 +1,6 @@
-import java.io.File
 import java.util.*
 
-object Main {
+object Day02 {
 
     @Throws(Exception::class)
     @JvmStatic
@@ -18,8 +17,8 @@ object Main {
         for (i in 0 until len) {
             //println("pos=$i")
 
-            val file = File("day02-input.txt")
-            file.forEachLine {
+            this.javaClass.getResourceAsStream("aoc18/day02/input.txt")
+                .bufferedReader().forEachLine {
                 val str = it.substring(0, i) + "." + it.substring(i + 1, it.length)
                 if (list.contains(str)) {
                     println("GEFUNDEN: $str")
@@ -35,8 +34,8 @@ object Main {
         var mul2 = 0
         var mul3 = 0
 
-        val file = File("day02-input.txt")
-        file.forEachLine {
+        this.javaClass.getResourceAsStream("aoc18/day02/input.txt")
+            .bufferedReader().forEachLine {
             val hasTwo = checkTwo(it)
             val hasThree = checkThree(it)
             println("$it ==> $hasTwo / $hasThree")
