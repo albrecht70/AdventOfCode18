@@ -24,7 +24,7 @@ object Day09 {
         print("players: $players - marbles: $marbles")
 
         val scores = IntArray(players)
-        val circle = LinkedList<Int>()
+        val circle = ArrayList<Int>()
         circle.add(0)
         var curr = 0
 
@@ -40,7 +40,7 @@ object Day09 {
                 circle.add(curr + 1, marble)
             }
         }
-        println(" => Max score: $scores.max()")
+        println(" => Max score: ${scores.max()}")
     }
 
 }
