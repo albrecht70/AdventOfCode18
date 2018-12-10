@@ -23,24 +23,77 @@ object Day09 {
     private fun play(players: Int, marbles: Int) {
         print("players: $players - marbles: $marbles")
 
-        val scores = IntArray(players)
-        val circle = ArrayList<Int>()
-        circle.add(0)
-        var curr = 0
+        val scores = LongArray(players)
+        val circle = Circle()
 
         for (marble in 1..marbles) {
             var player = ((marble-1) % players) + 1
             if (marble % 23 == 0) {
-                curr = ((curr - 6) + circle.size ) % circle.size
-                val rmMarble = circle.removeAt(curr)
-                curr--
-                scores[player-1] += marble + rmMarble
+                val rmVal = circle.prev(7).remove()
+                scores[player-1] += marble.toLong() + rmVal.toLong()
             } else {
-                curr = (curr + 2) % circle.size
-                circle.add(curr + 1, marble)
+                circle.next().insertAfter(Element(marble))
             }
+            //println("circle: $circle")
         }
         println(" => Max score: ${scores.max()}")
     }
 
+    class Element(val value: Int, var next: Element? = null, var prev: Element? = null) {
+        override fun toString(): String {
+            return "[$value]"
+        }
+    }
+
+    class Circle {
+
+        var curr: Element = Element(0)
+
+        init {
+            curr.next = curr
+            curr.prev = curr
+        }
+
+        fun next(): Circle {
+            curr = curr.next!!
+            return this
+        }
+
+        fun prev(count: Int = 1): Circle {
+            for (cc in 1..count) {
+                curr = curr.prev!!
+            }
+            return this
+        }
+
+        fun insertAfter(newElem: Element): Circle {
+            newElem.next = curr.next
+            newElem.prev = curr
+            curr.next!!.prev = newElem
+            curr.next = newElem
+            curr = newElem
+            return this
+        }
+
+        fun remove(): Int {
+            val value = curr.value
+            curr.prev!!.next = curr.next
+            curr.next!!.prev = curr.prev
+            curr = curr.next!!
+            return value
+        }
+
+        override fun toString(): String {
+            val startEl = curr;
+            var el = curr;
+
+            var str  = "["
+            do {
+                str += "$el "
+                el = el.next!!
+            } while (!el.equals(startEl))
+            str += "]"
+            return str
+        }
+    }
 }
