@@ -3,11 +3,11 @@ object Day10 {
     @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
+        teil1u2()
     }
 
     @Throws(Exception::class)
-    private fun teil1() {
+    private fun teil1u2() {
 
         val points = ArrayList<Point>()
         this.javaClass.getResourceAsStream("aoc18/day10/input.txt")
@@ -77,5 +77,4 @@ object Day10 {
         }
     }
 
-    // GFNKCGGH
 }
