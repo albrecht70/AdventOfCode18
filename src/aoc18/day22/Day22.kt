@@ -3,9 +3,7 @@ object Day22 {
     @JvmStatic
     fun main(args: Array<String>) {
         teil1()
-        val ms = System.currentTimeMillis()
         teil2()
-        println("Timing: ${System.currentTimeMillis()-ms}")
     }
 
     val extMap = 50
@@ -23,7 +21,7 @@ object Day22 {
         val visited = mutableSetOf<Node>()
 
         while (unvisited.isNotEmpty()) {
-            val node = distMap.filterKeys { k -> unvisited.contains(k) }.minBy { n -> n.value }!!.key
+            val node = unvisited.minBy { n -> distMap[n]!! }!!
             unvisited.remove(node)
             visited.add(node)
 
@@ -36,7 +34,6 @@ object Day22 {
                 changePos(nextPos, node, visited, unvisited, map, distMap)
             }
         }
-        println("visited #${visited.size}")
         println("=> ${distMap[Node(target, Tool.Torch)]}")
     }
 
