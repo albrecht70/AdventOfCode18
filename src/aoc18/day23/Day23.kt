@@ -17,27 +17,26 @@ object Day23 {
         var radius = bots.fold(0) { r, b -> max(r, max(abs(b.p.x), max(abs(b.p.y), abs(b.p.z))))}
         val startPos = Pos(0,0,0)
 
-        var candidates = setOf(Bot(startPos, radius))
+        var candidates = setOf(startPos)
         while (radius > 0) {
             radius /= 2
 
             val counts = mutableMapOf<Bot, Int>()
-            candidates.forEach { bot ->
-                bot.p.neighbors(radius).map { pos ->
+            candidates.forEach { p ->
+                p.neighbors(radius).map { pos ->
                     counts[Bot(pos, radius)] = bots.count { b -> manhDist(b.p, pos) <= b.r }
                 }
             }
             val max = counts.maxBy { e -> e.value }!!
-            candidates = counts.filter { e -> e.value == max.value }.map { e -> e.key }.toSet()
-
-            if (candidates.size > 10000) {
-                candidates = candidates.take(10000).toSet()
-            }
+            candidates = counts.filter { e -> e.value == max.value }
+                .map { e -> e.key.p }
+                .take(10000)
+                .toSet()
 
             println("r: $radius - max: $max - counts: #${counts.size} - candidates: #${candidates.count()}")
         }
 
-        val resultDist = manhDist(candidates.minBy { c -> manhDist(c.p, startPos) }!!.p, startPos)
+        val resultDist = manhDist(candidates.minBy { p -> manhDist(p, startPos) }!!, startPos)
         println("--> $resultDist")
     }
 
