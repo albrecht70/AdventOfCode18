@@ -27,6 +27,7 @@ object Day24 {
                     val attacker = e.key
                     val info = Attack(e.key, e.value.opponent)
                     if (attacker.hitPoints > 0) {
+                        //println("Attack: $attacker ==[${info.damage} / ${info.opponent.units} /${info.damage / info.opponent.hitPoints}]==> ${info.opponent}")
                         info.opponent.units = max(info.opponent.units - (info.damage / info.opponent.hitPoints), 0)
                     }
                 }
@@ -136,8 +137,8 @@ object Day24 {
 
     data class Attack(val attacker: Group, val opponent: Group) {
         val effPower: Int = attacker.attackPower * attacker.units
-        val oppEffPower: Int = opponent.attackPower * opponent.units
         val damage: Int
+        val oppEffPower: Int = opponent.attackPower * opponent.units
         val initiative: Int = opponent.initiative
 
         init {
