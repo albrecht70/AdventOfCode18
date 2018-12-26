@@ -7,7 +7,7 @@ object Day25 {
         teil1()
     }
 
-    val fixPoints = mutableListOf<Point>()
+    private val fixPoints = mutableListOf<Point>()
 
     private fun teil1() {
         parseInput()
@@ -20,37 +20,18 @@ object Day25 {
         constellations.add(firstConst)
 
         while (rest.isNotEmpty()) {
-            val ms1 = System.currentTimeMillis()
             val next = rest.removeAt(0)
-            val foundConsts = mutableListOf<MutableList<Point>>()
+            val foundConsts = constellations.filter { cc -> cc.find { fp -> fp.nearby(next) } != null }
 
-            for (cc in constellations) {
-                for (fp in cc) {
-                    if (fp.nearby(next)) {
-                        foundConsts.add(cc)
-                        break
-                    }
-                }
+            if (foundConsts.isEmpty()) {
+                val const = mutableListOf(next)
+                constellations.add(const)
+            } else {
+                foundConsts.first().add(next)
+                constellations.removeAll(foundConsts)
+                constellations.add(foundConsts.flatten().toMutableList())
             }
-
-            when {
-                foundConsts.isEmpty() -> {
-                    val const = mutableListOf(next)
-                    constellations.add(const)
-                }
-                foundConsts.size == 1 -> foundConsts.first().add(next)
-                else -> {
-                    println("merging...")
-                    val const = mutableListOf(next)
-                    for (fc in foundConsts) {
-                        const.addAll(fc)
-                        constellations.remove(fc)
-                    }
-                    constellations.add(const)
-                }
-            }
-            val ms2 = System.currentTimeMillis()
-            println("remain: #${rest.size} - constellations #${constellations.size} - timing: ${ms2 - ms1}")
+            println("remain: #${rest.size} - constellations #${constellations.size}")
         }
         println("constellations: #${constellations.size}")
     }
@@ -82,5 +63,4 @@ object Day25 {
             return p.contentHashCode()
         }
     }
-
 }

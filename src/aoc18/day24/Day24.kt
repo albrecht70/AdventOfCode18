@@ -22,15 +22,7 @@ object Day24 {
                 val attacks = mutableMapOf<Group,Attack>()
                 findOpponents(immuneArmy, infectionArmy, attacks)
                 findOpponents(infectionArmy, immuneArmy, attacks)
-
-                attacks.entries.sortedByDescending { e -> e.key.initiative }.forEach { e ->
-                    val attacker = e.key
-                    val info = Attack(e.key, e.value.opponent)
-                    if (attacker.hitPoints > 0) {
-                        //println("Attack: $attacker ==[${info.damage} / ${info.opponent.units} /${info.damage / info.opponent.hitPoints}]==> ${info.opponent}")
-                        info.opponent.units = max(info.opponent.units - (info.damage / info.opponent.hitPoints), 0)
-                    }
-                }
+                doAttack(attacks)
             }
             println("Boost: $boost - Immune System: ${immuneArmy.sumBy { a -> a.units }} - Infection: ${infectionArmy.sumBy { a -> a.units }}")
             boost++
@@ -45,38 +37,31 @@ object Day24 {
             val attacks = mutableMapOf<Group,Attack>()
             findOpponents(immuneArmy, infectionArmy, attacks)
             findOpponents(infectionArmy, immuneArmy, attacks)
+            doAttack(attacks)
 
-            attacks.entries.sortedByDescending { e -> e.key.initiative }.forEach { e ->
-                val attacker = e.key
-                val info = Attack(e.key, e.value.opponent)
-                if (attacker.hitPoints > 0) {
-                    //println("Attack: $attacker ==[${info.damage} / ${info.opponent.units} /${info.damage / info.opponent.hitPoints}]==> ${info.opponent}")
-                    info.opponent.units = max(info.opponent.units - (info.damage / info.opponent.hitPoints), 0)
-                }
-            }
             println("Immune System: ${immuneArmy.sumBy { a -> a.units }} - Infection: ${infectionArmy.sumBy { a -> a.units }}")
         }
     }
 
+    private fun doAttack(attacks: MutableMap<Group, Attack>) {
+        attacks.entries.sortedByDescending { e -> e.key.initiative }.forEach { e ->
+            val attacker = e.key
+            val attack = Attack(e.key, e.value.opponent)
+            if (attacker.hitPoints > 0) {
+                //println("Attack: $attacker ==[${attack.damage} / ${attack.opponent.units} /${attack.damage} / ${attack.opponent.hitPoints}]==> ${attack.opponent}")
+                attack.opponent.units = max(attack.opponent.units - (attack.damage / attack.opponent.hitPoints), 0)
+            }
+        }
+    }
+
     private fun findOpponents(attacker: MutableList<Group>, opponents: MutableList<Group>, attacks: MutableMap<Group,Attack>) {
-        val groups = mutableListOf<Group>()
-        groups.addAll(opponents.filter { it.units > 0 })
+        val groups = opponents.filter { it.units > 0 }.toMutableList()
 
         attacker.filter { it.units > 0 }.sortedByDescending { it.units * it.attackPower}.forEach { g ->
-            var bestOpponent: Attack? = null
-
-            for (op in groups) {
-                val attack = Attack(g, op)
-                if (bestOpponent == null) {
-                    bestOpponent = attack
-                } else
-                if (attack > bestOpponent) {
-                    bestOpponent = attack
-                }
-            }
-            if (bestOpponent != null) {
-                attacks[g] = bestOpponent
-                groups.remove(bestOpponent.opponent)
+            val bestOp: Attack? = groups.map { op -> Attack(g, op) }.max()
+            if (bestOp != null) {
+                attacks[g] = bestOp
+                groups.remove(bestOp.opponent)
             }
         }
     }
@@ -92,7 +77,7 @@ object Day24 {
         immuneArmy.clear()
         infectionArmy.clear()
         var isImmuneSystem = true
-        this.javaClass.getResourceAsStream("aoc18/day24/input.txt")
+        this.javaClass.getResourceAsStream("aoc18/day24/test.txt")
             .bufferedReader().forEachLine { line ->
                 if (line.startsWith("Immune System")) {
                     isImmuneSystem = true
@@ -135,11 +120,11 @@ object Day24 {
             }
     }
 
-    data class Attack(val attacker: Group, val opponent: Group) {
-        val effPower: Int = attacker.attackPower * attacker.units
+    data class Attack(val attacker: Group, val opponent: Group): Comparable<Attack> {
+        private val effPower: Int = attacker.attackPower * attacker.units
+        private val oppEffPower: Int = opponent.attackPower * opponent.units
+        private val initiative: Int = opponent.initiative
         val damage: Int
-        val oppEffPower: Int = opponent.attackPower * opponent.units
-        val initiative: Int = opponent.initiative
 
         init {
             this.damage = when {
@@ -149,7 +134,7 @@ object Day24 {
             }
         }
 
-        operator fun compareTo(a: Attack): Int = when {
+        override operator fun compareTo(a: Attack): Int = when {
             damage > a.damage -> 1
             damage == a.damage && oppEffPower > a.oppEffPower -> 1
             damage == a.damage && oppEffPower == a.oppEffPower && initiative > a.initiative -> 1
