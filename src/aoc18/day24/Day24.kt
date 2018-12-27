@@ -19,7 +19,7 @@ object Day24 {
 
             while (immuneArmy.sumBy { a -> a.units } > 0 && infectionArmy.sumBy { a -> a.units } > 0) {
 
-                val attacks = mutableMapOf<Group,Attack>()
+                val attacks = mutableMapOf<Group, Attack>()
                 findOpponents(immuneArmy, infectionArmy, attacks)
                 findOpponents(infectionArmy, immuneArmy, attacks)
                 doAttack(attacks)
@@ -34,7 +34,7 @@ object Day24 {
 
         while (immuneArmy.sumBy { a -> a.units } > 0 && infectionArmy.sumBy { a -> a.units } > 0) {
 
-            val attacks = mutableMapOf<Group,Attack>()
+            val attacks = mutableMapOf<Group, Attack>()
             findOpponents(immuneArmy, infectionArmy, attacks)
             findOpponents(infectionArmy, immuneArmy, attacks)
             doAttack(attacks)
@@ -44,26 +44,30 @@ object Day24 {
     }
 
     private fun doAttack(attacks: MutableMap<Group, Attack>) {
-        attacks.entries.sortedByDescending { e -> e.key.initiative }.forEach { e ->
-            val attacker = e.key
-            val attack = Attack(e.key, e.value.opponent)
-            if (attacker.hitPoints > 0) {
-                //println("Attack: $attacker ==[${attack.damage} / ${attack.opponent.units} /${attack.damage} / ${attack.opponent.hitPoints}]==> ${attack.opponent}")
+        attacks.entries.sortedByDescending { e -> e.key.initiative }.stream().filter { it.key.units > 0 }
+            .forEach { e ->
+                val attack = Attack(e.key, e.value.opponent)
+                //println("Attack: $e.key ==[${attack.damage} / ${attack.opponent.units} / ${attack.damage} / ${attack.opponent.hitPoints}]==> ${attack.opponent}")
                 attack.opponent.units = max(attack.opponent.units - (attack.damage / attack.opponent.hitPoints), 0)
             }
-        }
     }
 
-    private fun findOpponents(attacker: MutableList<Group>, opponents: MutableList<Group>, attacks: MutableMap<Group,Attack>) {
+    private fun findOpponents(
+        attacker: MutableList<Group>,
+        opponents: MutableList<Group>,
+        attacks: MutableMap<Group, Attack>
+    ) {
         val groups = opponents.filter { it.units > 0 }.toMutableList()
 
-        attacker.filter { it.units > 0 }.sortedByDescending { it.units * it.attackPower}.forEach { g ->
-            val bestOp: Attack? = groups.map { op -> Attack(g, op) }.max()
-            if (bestOp != null) {
-                attacks[g] = bestOp
-                groups.remove(bestOp.opponent)
+        attacker.filter { it.units > 0 }
+            .sortedWith(compareByDescending<Group> { it.units * it.attackPower }.thenBy { it.initiative })
+            .forEach { g ->
+                val bestOp: Attack? = groups.map { op -> Attack(g, op) }.max()
+                if (bestOp != null && bestOp.damage > 0) {
+                    attacks[g] = bestOp
+                    groups.remove(bestOp.opponent)
+                }
             }
-        }
     }
 
     val unitRegex = "^([0-9]*) units".toRegex()
@@ -77,7 +81,7 @@ object Day24 {
         immuneArmy.clear()
         infectionArmy.clear()
         var isImmuneSystem = true
-        this.javaClass.getResourceAsStream("aoc18/day24/test.txt")
+        this.javaClass.getResourceAsStream("aoc18/day24/input.txt")
             .bufferedReader().forEachLine { line ->
                 if (line.startsWith("Immune System")) {
                     isImmuneSystem = true
@@ -105,10 +109,12 @@ object Day24 {
                     val attackType = CombatType.valueOf(attackRegex.find(line)!!.groups[2]!!.value)
                     val initiative = initiativeRegex.find(line)!!.groups[1]!!.value.toInt()
 
-                    attackPower = if (isImmuneSystem) attackPower+boost else attackPower
+                    attackPower = if (isImmuneSystem) attackPower + boost else attackPower
 
-                    val system = Group(units, hitPoints, weaks, immunes,
-                        attackPower, attackType, initiative)
+                    val system = Group(
+                        units, hitPoints, weaks, immunes,
+                        attackPower, attackType, initiative
+                    )
 
                     if (isImmuneSystem) {
                         immuneArmy.add(system)
@@ -120,7 +126,7 @@ object Day24 {
             }
     }
 
-    data class Attack(val attacker: Group, val opponent: Group): Comparable<Attack> {
+    data class Attack(val attacker: Group, val opponent: Group) : Comparable<Attack> {
         private val effPower: Int = attacker.attackPower * attacker.units
         private val oppEffPower: Int = opponent.attackPower * opponent.units
         private val initiative: Int = opponent.initiative
@@ -143,10 +149,12 @@ object Day24 {
         }
     }
 
-    data class Group(var units: Int, var hitPoints: Int,
-                     val weakness: List<CombatType>, val immune: List<CombatType>,
-                     val attackPower: Int, val attackType: CombatType,
-                     val initiative: Int)
+    data class Group(
+        var units: Int, var hitPoints: Int,
+        val weakness: List<CombatType>, val immune: List<CombatType>,
+        val attackPower: Int, val attackType: CombatType,
+        val initiative: Int
+    )
 
     enum class CombatType {
         radiation, bludgeoning, fire, cold, slashing
