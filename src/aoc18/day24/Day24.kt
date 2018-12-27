@@ -60,10 +60,10 @@ object Day24 {
         val groups = opponents.filter { it.units > 0 }.toMutableList()
 
         attacker.filter { it.units > 0 }
-            .sortedWith(compareByDescending<Group> { it.units * it.attackPower }.thenBy { it.initiative })
+            .sortedWith(compareByDescending<Group> { it.units * it.attackPower }.thenByDescending { it.initiative })
             .forEach { g ->
                 val bestOp: Attack? = groups.map { op -> Attack(g, op) }.max()
-                if (bestOp != null && bestOp.damage > 0) {
+                if (bestOp != null && bestOp.damage > 0 && bestOp.damage >= bestOp.opponent.hitPoints) {
                     attacks[g] = bestOp
                     groups.remove(bestOp.opponent)
                 }
@@ -133,10 +133,10 @@ object Day24 {
         val damage: Int
 
         init {
-            this.damage = when {
+            this.damage = this.effPower * when {
                 opponent.immune.contains(attacker.attackType) -> 0
-                opponent.weakness.contains(attacker.attackType) -> this.effPower * 2
-                else -> this.effPower
+                opponent.weakness.contains(attacker.attackType) -> 2
+                else -> 1
             }
         }
 
