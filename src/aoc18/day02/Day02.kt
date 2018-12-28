@@ -1,68 +1,37 @@
-import java.util.*
+import java.io.File
 
 object Day02 {
 
-    @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
-        teil2()
+        part1()
+        part2()
     }
 
-    @Throws(Exception::class)
-    private fun teil2() {
+    private fun part1() {
+        val inputList = parseInput()
+        val charCounts = inputList.map { str -> str.groupingBy { it }.eachCount() }
+        val count2 = charCounts.count { c -> c.values.any { it == 2 } }
+        val count3 = charCounts.count { c -> c.values.any { it == 3 } }
+        println("Part1: $count2 x $count3 = ${count2 * count3}")
+    }
 
-        val list = ArrayList<String>()
-        val len = 26
-        for (i in 0 until len) {
-            //println("pos=$i")
+    private fun part2() {
+        val inputList = parseInput()
+        val tries = mutableSetOf<String>()
+        val len = inputList.first().length - 1
 
-            this.javaClass.getResourceAsStream("aoc18/day02/input.txt")
-                .bufferedReader().forEachLine {
-                val str = it.substring(0, i) + "." + it.substring(i + 1, it.length)
-                if (list.contains(str)) {
-                    println("GEFUNDEN: $str")
-                } else {
-                    list.add(str)
+        for (idx in 0..len) {
+            inputList.forEach { id ->
+                val str = id.replaceRange(idx, idx+1, ".")
+                if (!tries.add(str)) {
+                    println("Part2: $str")
+                    return
                 }
             }
         }
     }
 
-    @Throws(Exception::class)
-    private fun teil1() {
-        var mul2 = 0
-        var mul3 = 0
-
-        this.javaClass.getResourceAsStream("aoc18/day02/input.txt")
-            .bufferedReader().forEachLine {
-            val hasTwo = checkTwo(it)
-            val hasThree = checkThree(it)
-            println("$it ==> $hasTwo / $hasThree")
-
-            if (hasTwo)
-                mul2++
-            if (hasThree)
-                mul3++
-        }
-
-        println(mul2.toString() + " x " + mul3 + " = " + mul2 * mul3)
-    }
-
-    private fun checkTwo(line: String): Boolean {
-        val map = mutableMapOf<Char, Int>()
-        line.forEach {
-            map[it] = map.getOrDefault(it, 0) + 1
-        }
-
-        return map.values.stream().anyMatch { it == 2 }
-    }
-
-    private fun checkThree(line: String): Boolean {
-        val map = mutableMapOf<Char, Int>()
-        line.forEach {
-            map[it] = map.getOrDefault(it, 0) + 1
-        }
-        return map.values.stream().anyMatch { it == 3 }
-    }
+    private fun parseInput(): List<String> =
+        File(this.javaClass.getResource("aoc18/day02/input.txt").toURI()).readLines()
 }
