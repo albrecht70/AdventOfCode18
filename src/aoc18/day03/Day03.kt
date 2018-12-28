@@ -1,92 +1,67 @@
+import kotlin.math.max
+
 object Day03 {
 
-    @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
-        teil2()
+        part1()
+        part2()
     }
 
-    @Throws(Exception::class)
-    private fun teil2() {
-        var maxSize = 1000
-        var ids = ArrayList<String>()
-        var fabric = Array(maxSize, {Array(maxSize, { ArrayList<String>() }) })
+    private fun part1() {
+        val claims = parseInput()
+        val maxSize = claims.fold(0) { max, c -> max(max, (max(c.x + c.w, c.y + c.h))) }
+        val fabric = Array(maxSize) { Array(maxSize) { 0 } }
 
+        claims.forEach { c ->
+            for (xPos in c.x until c.x + c.w) {
+                for (yPos in c.y until c.y + c.h) {
+                    fabric[xPos][yPos] += 1
+                }
+            }
+        }
+
+        val count = fabric.flatten().count { it > 1 }
+        println("Part1: Square count: $count")
+    }
+
+    private fun part2() {
+        val claims = parseInput()
+        val maxSize = claims.fold(0) { max, c -> max(max, (max(c.x + c.w, c.y + c.h))) }
+
+        val ids = mutableSetOf<String>()
+        val fabric = Array(maxSize) { Array(maxSize) { mutableSetOf<String>() } }
+
+        claims.forEach { c ->
+            ids.add(c.id)
+            for (xPos in c.x until c.x + c.w) {
+                for (yPos in c.y until c.y + c.h) {
+                    fabric[xPos][yPos].add(c.id)
+                }
+            }
+        }
+
+        ids.removeAll(fabric.flatten().filter { it.size > 1 }.flatten())
+        println("Part2: ID: ${ids.first()}")
+    }
+
+    private val pattern = "^#(\\d+) @ (\\d+),(\\d+): (\\d+)x(\\d+)$".toRegex()
+
+    private fun parseInput(): List<Claim> {
+        val claims = mutableListOf<Claim>()
         this.javaClass.getResourceAsStream("aoc18/day03/input.txt")
-            .bufferedReader().forEachLine {
-            val idx1 = it.indexOf('@')
-            val idx2 = it.indexOf(',')
-            val idx3 = it.indexOf(':')
-            val idx4 = it.indexOf('x')
+            .bufferedReader().forEachLine { line ->
+                val m = pattern.find(line)?.destructured ?: throw IllegalArgumentException("invalid input: $line")
+                claims.add(
+                    Claim(
+                        m.component1(), m.component2().toInt(), m.component3().toInt(),
+                        m.component4().toInt(), m.component5().toInt()
+                    )
+                )
 
-            val id = it.substring(1, idx1-1)
-            val xx = it.substring(idx1+2, idx2).toInt()
-            val yy = it.substring(idx2+1, idx3).toInt()
-            val ww = it.substring(idx3+2, idx4).toInt()
-            val hh = it.substring(idx4+1).toInt()
-
-            println("$it --> `$id` $xx,$yy > $ww x $hh")
-
-            ids.add(id)
-            for(xPos in xx..(xx + ww - 1)) {
-                for(yPos in yy..(yy + hh - 1)) {
-                    var used = fabric.get(xPos).get(yPos)
-                    used.add(id)
-                }
             }
-        }
-        println("ID count: ${ids.size}")
-
-        for(row in fabric) {
-            for(col in row) {
-                if (col.size > 1) {
-                    for (testId in col) {
-                        ids.remove(testId)
-                    }
-                }
-            }
-        }
-
-        println("Left over IDs: $ids")
+        return claims
     }
 
-    @Throws(Exception::class)
-    private fun teil1() {
-        val maxSize = 1000
-        var fabric = Array(maxSize, {IntArray(maxSize)})
-
-        this.javaClass.getResourceAsStream("aoc18/day03/input.txt")
-            .bufferedReader().forEachLine {
-            val idx1 = it.indexOf('@')
-            val idx2 = it.indexOf(',')
-            val idx3 = it.indexOf(':')
-            val idx4 = it.indexOf('x')
-
-            val id = it.substring(1, idx1-1)
-            val xx = it.substring(idx1+2, idx2).toInt()
-            val yy = it.substring(idx2+1, idx3).toInt()
-            val ww = it.substring(idx3+2, idx4).toInt()
-            val hh = it.substring(idx4+1).toInt()
-
-            println("$it --> `$id` $xx,$yy > $ww x $hh")
-
-            for(xPos in xx..(xx + ww - 1)) {
-                for(yPos in yy..(yy + hh - 1)) {
-                    fabric.get(xPos).set(yPos, 1 + fabric.get(xPos).get(yPos))
-                }
-            }
-        }
-
-        var count = 0
-        for(row in fabric) {
-            for(col in row) {
-                if (col > 1) {
-                    count++
-                }
-            }
-        }
-        println("Count: $count")
-    }
-
+    data class Claim(val id: String, val x: Int, val y: Int, val w: Int, val h: Int)
 }
