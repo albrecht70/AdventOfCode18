@@ -1,31 +1,35 @@
-import java.util.*
-
 object Day01 {
 
-    @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
+
+        val freqList = parseInput()
+        println("Part1: sum=${freqList.sum()}")
+
+        val seenFreqs = mutableSetOf<Int>()
         var sum = 0
-        var pos = 0
-        val sumList = ArrayList<Int>()
+        val freq = freqList.toInfiniteSequence()
+            .map { f ->
+                sum += f
+                sum
+            }.first { !seenFreqs.add(it) }
 
-        var found = false;
-        while (!found) {
+        println("Part2: freq=$freq")
+    }
 
-            this.javaClass.getResourceAsStream("aoc18/day01/input.txt")
-                .bufferedReader().forEachLine {
-
-                sum += Integer.parseInt(it)
-                pos++
-                //println("pos/sum: $pos / $sum")
-
-                if (sumList.contains(sum)) {
-                    println("==> Sum: " + sum)
-                    found = true
-                    System.exit(1)
-                }
-                sumList.add(sum)
+    private fun parseInput(): List<Int> {
+        val freqList = mutableListOf<Int>()
+        this.javaClass.getResourceAsStream("aoc18/day01/input.txt")
+            .bufferedReader().forEachLine { line ->
+                freqList.add(line.toInt())
             }
+        return freqList
+    }
+
+    private fun <T> List<T>.toInfiniteSequence(): Sequence<T> = sequence {
+        while (true) {
+            yieldAll(this@toInfiniteSequence)
         }
     }
+
 }
