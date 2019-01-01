@@ -1,38 +1,27 @@
+import java.io.File
+
 object Day08 {
 
-    @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1u2()
+        part1and2()
     }
 
-    class Node(val name: String, val childCount: Int, val metaCount: Int, var value:Int = 0,
-            val childNodes:ArrayList<Node> = ArrayList(), var nodeEndPos: Int = 0) {
-        override fun toString(): String {
-            return "[$name #$childCount #$metaCount]"
-        }
+    private fun part1and2() {
+        val input = parseInput()
+        val nodes = mutableListOf<Node>()
+        val node = parseRec(input, 0, nodes)
+
+        println("Part1: sum: $sum")
+        println("Part2: root value: ${node.value}")
     }
 
-    var charSeq = 'A'
-    var sum = 0
+    private var charSeq = 'A'
+    private var sum = 0
 
-    @Throws(Exception::class)
-    private fun teil1u2() {
-        val nodes = ArrayList<Node>()
-
-        this.javaClass.getResourceAsStream("aoc18/day08/input.txt")
-            .bufferedReader().forEachLine {
-            val input = it.split(" ").map { it -> (it.toInt()) }
-            val node = parseRec(input, 0, nodes)
-            println("Root value: " + node.value)
-        }
-
-        println("Sum: $sum")
-    }
-
-    private fun parseRec(input:List<Int>, pos:Int, nodes:ArrayList<Node>):Node {
-        val node = Node(charSeq.toString(), input.get(pos + 0), input.get(pos + 1))
-        println("Node: $node - pos: $pos")
+    private fun parseRec(input: List<Int>, pos: Int, nodes: MutableList<Node>): Node {
+        val node = Node(input[pos + 0], input[pos + 1])
+        //println("Node: $node - pos: $pos")
         nodes.add(node)
         charSeq = charSeq.inc()
 
@@ -44,7 +33,7 @@ object Day08 {
         }
         var metaValue = 0
         for (meta in 1..node.metaCount) {
-            val metadata = input.get(pos2+meta-1)
+            val metadata = input[pos2 + meta - 1]
             metaValue += metadata
             sum += metadata
         }
@@ -53,14 +42,23 @@ object Day08 {
             node.value = metaValue
         } else {
             for (meta in 1..node.metaCount) {
-                val metadata = input.get(pos2+meta-1)
+                val metadata = input[pos2 + meta - 1]
                 if (metadata > 0 && metadata <= node.childNodes.size) {
-                    node.value += node.childNodes[metadata-1].value
+                    node.value += node.childNodes[metadata - 1].value
                 }
             }
         }
         node.nodeEndPos = pos2 + node.metaCount
         return node
     }
+
+    private fun parseInput(): List<Int> =
+        File(this.javaClass.getResource("aoc18/day08/input.txt").toURI())
+            .readText().split(" ").map { text -> (text.toInt()) }
+
+    data class Node(
+        val childCount: Int, val metaCount: Int, var value: Int = 0,
+        val childNodes: ArrayList<Node> = ArrayList(), var nodeEndPos: Int = 0
+    )
 
 }
