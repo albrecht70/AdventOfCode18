@@ -1,103 +1,66 @@
 object Day06 {
-    var dim = 358
-    var threshold = 10000
 
-    @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
-        teil2()
+        part1()
+        part2()
     }
 
-    class Coord(var x:Int, var y:Int, var id:String? = null, var distance:Int? = null, var distanceTo:String? = null)
+    private fun part1() {
+        val coords = parseInput()
+        val dimx = coords.maxBy { c -> c.x }!!.x
+        val dimy = coords.maxBy { c -> c.y }!!.y
 
-    class Coord2(var x:Int, var y:Int, var id:String? = null, var sumDist:Int = 0)
-
-    @Throws(Exception::class)
-    private fun teil2() {
-        var pointId = 1
-        var grid = Array(dim, { val yInd = it;Array(dim, { Coord2(it, yInd)}) })
-
-        this.javaClass.getResourceAsStream("aoc18/day06/input.txt")
-            .bufferedReader().forEachLine {
-            val idx = it.indexOf(',')
-            val x = it.substring(0,idx).toInt()
-            val y = it.substring(idx+2).toInt()
-            grid[x][y] = Coord2(x, y, "P${pointId}")
-            pointId++
-        }
-
-        // calc manhattan distance
-        for (coord in grid.flatten()) {
-            coord.sumDist = grid.flatten()
-                    .filter{coord -> (coord.id != null)}
-                    .sumBy { p -> (Math.abs(coord.x - p.x) + Math.abs(coord.y - p.y)) }
-        }
-
-        val withinSize = grid.flatten().filter{coord -> (coord.sumDist < threshold)}.size
-
-        // print map
-        for (row in grid) {
-            for (col in row) {
-                if (col.sumDist < threshold)
-                    print("#")
-                else
-                    print(".")
-            }
-            println()
-        }
-
-        println("Size: $withinSize")
-    }
-
-    @Throws(Exception::class)
-    private fun teil1() {
-        var pointId = 1
-        var grid = Array(dim, { val yInd = it;Array(dim, { Coord(it, yInd)}) })
-
-        this.javaClass.getResourceAsStream("aoc18/day06/input.txt")
-            .bufferedReader().forEachLine {
-            val idx = it.indexOf(',')
-            val x = it.substring(0,idx).toInt()
-            val y = it.substring(idx+2).toInt()
-            //println("$it : x:$x y:$y")
-            grid[x][y] = Coord(x, y, "P${pointId}")
-            pointId++
-        }
-
-        // calc manhattan distance
-        for (coord in grid.flatten().parallelStream()) {
-            if (coord.id != null) {
-                coord.distance = 0
-                coord.distanceTo = "${coord.id}"
-            } else {
-                var minDist = Int.MAX_VALUE
-                var minPoint: String? = null
-                for (p in grid.flatten().filter{coord -> (coord.id != null)}) {
-                    val dist = Math.abs(coord.x - p.x) + Math.abs(coord.y - p.y)
-                    if (minDist > dist) {
-                        minDist = dist
-                        minPoint = p.id
-                    }
+        val edgeCoords = mutableSetOf<Coord>()
+        val result = (0..dimy).flatMap { y ->
+            (0..dimx).map { x ->
+                val minCoords = coords.map { c -> c to c.manhDist(x, y) }
+                    .sortedBy { it.second }
+                    .take(2)
+                if (x == 0 || y == 0 || x == dimx || y == dimy) {
+                    edgeCoords.add(minCoords[0].first)
                 }
-                coord.distance = minDist
-                coord.distanceTo = "$minPoint"
+                minCoords[0].first.takeUnless { minCoords[0].second == minCoords[1].second }
             }
-        }
+        }.filterNot { it in edgeCoords }
+            .groupingBy { it }
+            .eachCount()
+            .maxBy { it.value }!!
+            .value
+        println("Part1: $result")
+    }
 
-        for (cell in grid.flatten().groupBy { it.distanceTo }
-                .filter { pEntry -> (pEntry.value
-                        .find{ c -> (c.x == 0 || c.x == dim-1 || c.y == 0 || c.y == dim-1)}) == null }) {
+    private fun part2() {
+        val coords = parseInput()
+        val dimx = coords.maxBy { c -> c.x }!!.x
+        val dimy = coords.maxBy { c -> c.y }!!.y
 
-            println("${cell.key} --> count: ${cell.value.count()}")
-        }
+        val result = (0..dimy).flatMap { y ->
+            (0..dimx).map { x ->
+                coords.map { c -> c.manhDist(x, y) }.sum()
+            }
+        }.filter { it < 10000 }
+            .count()
 
-        val maxEntry: Map.Entry<String?, List<Coord>>? = grid.flatten().groupBy { it.distanceTo }
-                .filter { pEntry ->
-                    (pEntry.value
-                            .find { c -> (c.x == 0 || c.x == dim - 1 || c.y == 0 || c.y == dim - 1) }) == null
-                }.maxBy { it.value.count() }
-        println("${maxEntry!!.key} -> #${maxEntry!!.value.count()}")
+        println("Part2: $result")
+    }
+
+    private fun parseInput(): List<Coord> {
+        val coords = mutableListOf<Coord>()
+        this.javaClass.getResourceAsStream("aoc18/day06/input.txt")
+            .bufferedReader().forEachLine { line ->
+                val idx = line.indexOf(',')
+                val x = line.substring(0, idx).toInt()
+                val y = line.substring(idx + 2).toInt()
+                coords.add(Coord(x, y))
+            }
+        return coords
+    }
+
+    data class Coord(var x: Int, var y: Int) {
+
+        fun manhDist(cx: Int, cy: Int) =
+            Math.abs(x - cx) + Math.abs(y - cy)
     }
 
 }
