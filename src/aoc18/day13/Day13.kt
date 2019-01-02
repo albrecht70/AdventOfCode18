@@ -2,55 +2,22 @@ object Day13 {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1u2()
+        part1and2()
     }
 
-    data class Car(
-        var xPos: Int,
-        var yPos: Int,
-        var direction: Char,
-        var nextTurn: Char = 'l',
-        var crashed: Boolean = false
-    )
+    val dim = 150
+    val roadMap = Array(dim) { CharArray(dim) { ' ' } }
+    val cars = mutableListOf<Car>()
 
-    val cars = ArrayList<Car>()
-    val roadMap = Array(150) { CharArray(150) { ' ' } }
-
-    private fun teil1u2() {
-
-        var row = 0
-        this.javaClass.getResourceAsStream("aoc18/day13/input.txt")
-            .bufferedReader().forEachLine {
-                roadMap[row++] = it.toCharArray()
-            }
-
-        roadMap.forEachIndexed { yIdx, chars ->
-            for (ch in "><^v") {
-                val xIdx = chars.indexOf(ch)
-                if (xIdx > -1) {
-                    cars.add(Car(xIdx, yIdx, ch))
-                }
-            }
-        }
-
-        println("#${cars.size} cars")
+    private fun part1and2() {
+        parseInput()
 
         var tick = 0
+        var firstCrash = true
         while (cars.count { car -> !car.crashed } > 1) {
-            cars.sortWith(Comparator { c1, c2 ->
-                when {
-                    c1.yPos > c2.yPos -> 1
-                    c1.yPos == c2.yPos && c1.xPos > c2.xPos -> 1
-                    c1.xPos == c2.xPos && c1.yPos == c2.yPos -> 0
-                    else -> -1
-                }
-            })
+            cars.sortWith(compareBy<Car> { it.yPos }.thenBy {it.xPos})
 
-            for (car in cars) {
-                if (car.crashed) {
-                    continue
-                }
-
+            cars.asSequence().filterNot { it.crashed }.forEach { car ->
                 var newX = car.xPos
                 var newY = car.yPos
                 when (car.direction) {
@@ -81,25 +48,25 @@ object Day13 {
                                 || car.direction == '>' && car.nextTurn == 's'
                             ) {
                                 car.direction = '>'
-                                nextTurn(car)
+                                car.nextTurn()
                             } else if (car.direction == 'v' && car.nextTurn == 'r'
                                 || car.direction == '^' && car.nextTurn == 'l'
                                 || car.direction == '<' && car.nextTurn == 's'
                             ) {
                                 car.direction = '<'
-                                nextTurn(car)
+                                car.nextTurn()
                             } else if (car.direction == '^' && car.nextTurn == 's'
                                 || car.direction == '>' && car.nextTurn == 'l'
                                 || car.direction == '<' && car.nextTurn == 'r'
                             ) {
                                 car.direction = '^'
-                                nextTurn(car)
+                                car.nextTurn()
                             } else if (car.direction == 'v' && car.nextTurn == 's'
                                 || car.direction == '>' && car.nextTurn == 'r'
                                 || car.direction == '<' && car.nextTurn == 'l'
                             ) {
                                 car.direction = 'v'
-                                nextTurn(car)
+                                car.nextTurn()
                             }
                 }
 
@@ -107,7 +74,10 @@ object Day13 {
                     .find { it.xPos == car.xPos && it.yPos == car.yPos }
 
                 if (crashCar != null) {
-                    println("Crash: $crashCar and $car at tick $tick")
+                    if (firstCrash) {
+                        println("Part1: crash location: ${crashCar.xPos},${crashCar.yPos}")
+                        firstCrash = false
+                    }
                     car.crashed = true
                     crashCar.crashed = true
                 }
@@ -117,16 +87,42 @@ object Day13 {
         }
 
         val lastCar = cars.filter { car -> !car.crashed }.first()
-        println("Remaining car is at position: [${lastCar.xPos},${lastCar.yPos}]")
+        println("Part2: location: ${lastCar.xPos},${lastCar.yPos}")
     }
 
-    private fun nextTurn(car: Car) {
-        car.nextTurn = when (car.nextTurn) {
-            'l' -> 's'
-            's' -> 'r'
-            'r' -> 'l'
-            else  -> '?'
+    private fun parseInput() {
+        var row = 0
+        this.javaClass.getResourceAsStream("aoc18/day13/input.txt")
+            .bufferedReader().forEachLine { line ->
+                roadMap[row++] = line.toCharArray()
+            }
+
+        roadMap.forEachIndexed { yIdx, chars ->
+            for (ch in "><^v") {
+                val xIdx = chars.indexOf(ch)
+                if (xIdx > -1) {
+                    cars.add(Car(xIdx, yIdx, ch))
+                }
+            }
+        }
+
+    }
+
+    data class Car(
+        var xPos: Int,
+        var yPos: Int,
+        var direction: Char,
+        var nextTurn: Char = 'l',
+        var crashed: Boolean = false
+    ) {
+
+        fun nextTurn() {
+            nextTurn = when (nextTurn) {
+                'l' -> 's'
+                's' -> 'r'
+                'r' -> 'l'
+                else  -> '?'
+            }
         }
     }
-
 }

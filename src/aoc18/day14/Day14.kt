@@ -2,59 +2,51 @@ object Day14 {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
-        teil2()
+        part1()
+        part2()
     }
 
-    private fun teil2() {
-        for (numRecipes in listOf(9, 5, 18, 2018, 598701)) {
+    val numRecipes = 598701
 
-            val inDigits = numRecipes.toString().toCharArray().map {it - '0'}
+    private fun part1() {
+        val scoreboard = addRecipes { sb -> sb.size == numRecipes + 10 }
 
-            val scoreboard = mutableListOf(3, 7)
-            var elf1 = 0
-            var elf2 = 1
+        val result = scoreboard.takeLast(10).joinToString("")
+        println("Part1: $result")
+    }
 
-            var result = -1
-            var tick = 0
-            do {
-                val sum = scoreboard[elf1] + scoreboard[elf2]
-                val digits = sum.toString().toCharArray().map { it - '0' }.toList()
-                scoreboard.addAll(digits)
+    private fun part2() {
+        val inDigits = numRecipes.asDigits()
+        val scoreboard = addRecipes { sb -> sb.endsWith(inDigits) }
 
-                elf1 = (elf1 + 1 + scoreboard[elf1]) % scoreboard.size
-                elf2 = (elf2 + 1 + scoreboard[elf2]) % scoreboard.size
+        val result = scoreboard.size - inDigits.size
+        println("Part2: $result")
+    }
 
-                if (tick % 100000 == 0) {
-                    result = scoreboard.windowed(inDigits.size).indexOf(inDigits)
+    private fun addRecipes(stopCondition: (List<Int>) -> Boolean): List<Int> {
+        val scoreboard = mutableListOf(3, 7)
+        var elf1 = 0
+        var elf2 = 1
+        var stop = false
+
+        while (!stop) {
+            val sum = scoreboard[elf1] + scoreboard[elf2]
+            sum.asDigits().forEach { d ->
+                if (!stop) {
+                    scoreboard.add(d)
+                    stop = stopCondition(scoreboard)
                 }
-                tick++
-            } while (result < 0)
-
-            println("Result[$numRecipes]: ticks: $tick -> $result")
+            }
+            elf1 = (elf1 + 1 + scoreboard[elf1]) % scoreboard.size
+            elf2 = (elf2 + 1 + scoreboard[elf2]) % scoreboard.size
         }
+
+        return scoreboard
     }
 
-    private fun teil1() {
-        for (numRecipes in listOf(9, 5, 18, 2018, 598701)) {
-            val scoreboard = mutableListOf(3, 7)
-            var elf1 = 0
-            var elf2 = 1
+    private fun Int.asDigits(): List<Int> = this.toString().map { it.toString().toInt() }
 
-            do {
-                val sum = scoreboard[elf1] + scoreboard[elf2]
-                val digits = sum.toString().toCharArray().map { it - '0' }.toList()
-                scoreboard.addAll(digits)
-
-                elf1 = (elf1 + 1 + scoreboard[elf1]) % scoreboard.size
-                elf2 = (elf2 + 1 + scoreboard[elf2]) % scoreboard.size
-
-                //println("{$elf1, $elf2} : $scoreboard")
-            } while (scoreboard.size <= numRecipes + 10)
-
-            val result = scoreboard.subList(numRecipes, numRecipes + 10)
-            println("Result[$numRecipes]: ${result.joinToString("")}")
-        }
-    }
-
+    private fun List<Int>.endsWith(other: List<Int>): Boolean =
+        if (this.size < other.size) false
+        else this.slice(this.size - other.size until this.size) == other
 }
