@@ -16,8 +16,8 @@ object Day24 {
 
         while (immuneArmy.sumBy { a -> a.units } > 0 && infectionArmy.sumBy { a -> a.units } > 0) {
             val attacks = mutableMapOf<Group, Attack>()
-            findOpponents(immuneArmy, infectionArmy, attacks)
-            findOpponents(infectionArmy, immuneArmy, attacks)
+            findOpponents(immuneArmy, infectionArmy, attacks, false)
+            findOpponents(infectionArmy, immuneArmy, attacks, false)
             doAttack(attacks)
         }
         println("Part1: ${infectionArmy.sumBy { a -> a.units }}")
@@ -30,8 +30,8 @@ object Day24 {
 
             while (immuneArmy.sumBy { a -> a.units } > 0 && infectionArmy.sumBy { a -> a.units } > 0) {
                 val attacks = mutableMapOf<Group, Attack>()
-                findOpponents(immuneArmy, infectionArmy, attacks)
-                findOpponents(infectionArmy, immuneArmy, attacks)
+                findOpponents(immuneArmy, infectionArmy, attacks, true)
+                findOpponents(infectionArmy, immuneArmy, attacks, true)
                 doAttack(attacks)
             }
             println("Boost: $boost - Immune System: ${immuneArmy.sumBy { a -> a.units }} - Infection: ${infectionArmy.sumBy { a -> a.units }}")
@@ -50,17 +50,23 @@ object Day24 {
             }
     }
 
-    private fun findOpponents(attacker: List<Group>, opponents: List<Group>, attacks: MutableMap<Group, Attack>) {
+    private fun findOpponents(
+        attacker: List<Group>,
+        opponents: List<Group>,
+        attacks: MutableMap<Group, Attack>,
+        hasBoost: Boolean
+    ) {
         val groups = opponents.filter { it.units > 0 }.toMutableList()
 
         attacker.filter { it.units > 0 }
             .sortedWith(compareByDescending<Group> { it.units * it.attackPower }.thenByDescending { it.initiative })
             .forEach { g ->
-                val bestOp: Attack? = groups.map { op -> Attack(g, op) }.max()
-                if (bestOp != null && bestOp.damage > 0 && bestOp.damage >= bestOp.opponent.hitPoints) {
-                    attacks[g] = bestOp
-                    groups.remove(bestOp.opponent)
-                }
+                groups.map { op -> Attack(g, op) }
+                    .filter { a -> !hasBoost || a.damage >= a.opponent.hitPoints }
+                    .max()?.let { bestOp ->
+                        attacks[g] = bestOp
+                        groups.remove(bestOp.opponent)
+                    }
             }
     }
 
