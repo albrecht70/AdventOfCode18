@@ -4,14 +4,13 @@ object Day20 {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1u2()
+        part1and2()
     }
 
-    private fun teil1u2() {
+    private fun part1and2() {
         val charSeq = parseInput().asIterable().iterator()
         val map = mutableSetOf<Pair<Pos,Pos>>()
         createMap(charSeq, map, Pos(0, 0))
-        println("map: #${map.size}")
         findPath(Pos(0,0), map)
     }
 
@@ -55,11 +54,10 @@ object Day20 {
                     queue.add(np)
                 }
         }
-        println("distances #${distances.size}")
-        val max = distances.maxBy { e -> e.value }
-        println("Max distance: ${max!!.value}")
+        val max = distances.maxBy { e -> e.value }!!
+        println("Part1: max distance: ${max.value}")
         val largePaths = distances.filterValues { it >= 1000 }.count()
-        println("Large paths: $largePaths")
+        println("Part2: large paths: $largePaths")
     }
 
     private fun parseInput(): String {

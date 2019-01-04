@@ -5,15 +5,22 @@ object Day23 {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
-        teil2()
+        part1()
+        part2()
     }
 
-    val bots = mutableListOf<Bot>()
+    private val bots = mutableListOf<Bot>()
 
-    private fun teil2() {
+    private fun part1() {
         parseInput()
+        val maxBot = bots.maxBy { b -> b.r }!!
+        val count = bots.filter { b -> manhDist(b.p, maxBot.p) <= maxBot.r }.count()
 
+        println("Part1: count: $count")
+    }
+
+    private fun part2() {
+        parseInput()
         var radius = bots.fold(0) { r, b -> max(r, max(abs(b.p.x), max(abs(b.p.y), abs(b.p.z))))}
         val startPos = Pos(0,0,0)
 
@@ -32,21 +39,10 @@ object Day23 {
                 .map { e -> e.key.p }
                 .take(10000)
                 .toSet()
-
-            println("r: $radius - max: $max - counts: #${counts.size} - candidates: #${candidates.count()}")
         }
 
         val resultDist = manhDist(candidates.minBy { p -> manhDist(p, startPos) }!!, startPos)
-        println("--> $resultDist")
-    }
-
-    private fun teil1() {
-        parseInput()
-
-        val maxBot = bots.maxBy { b -> b.r }!!
-        val count = bots.filter { b -> manhDist(b.p, maxBot.p) <= maxBot.r }.count()
-
-        println("Count: $count")
+        println("Part2: $resultDist")
     }
 
     private fun manhDist(p1: Pos, p2: Pos) =

@@ -2,15 +2,23 @@ object Day22 {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
-        teil2()
+        part1()
+        part2()
     }
 
-    val extMap = 50
-    var depth = 0
-    var target = Pos(0, 0)
+    private val extMap = 50
+    private var depth = 0
+    private var target = Pos(0, 0)
 
-    private fun teil2() {
+    private fun part1() {
+        parseInput()
+        val map = buildMap(target.x + 1, target.y + 1)
+
+        val risk = map.flatten().sumBy { t -> t.type }
+        println("Part1: total risk level: $risk")
+    }
+
+    private fun part2() {
         parseInput()
         val map = buildMap(target.x + extMap, target.y + extMap)
 
@@ -34,7 +42,7 @@ object Day22 {
                 changePos(nextPos, node, visited, unvisited, map, distMap)
             }
         }
-        println("=> ${distMap[Node(target, Tool.Torch)]}")
+        println("Part2: ${distMap[Node(target, Tool.Torch)]}")
     }
 
     private fun changeTool(
@@ -80,15 +88,6 @@ object Day22 {
         distMap[nextNode] = Math.min(distMap.getOrDefault(nextNode, dist), dist)
     }
 
-    private fun teil1() {
-        parseInput()
-        val map = buildMap(target.x + 1, target.y + 1)
-        printMap(map)
-
-        val risk = map.flatten().sumBy { t -> t.type }
-        println("Total risk level: $risk")
-    }
-
     private fun buildMap(dimx: Int, dimy: Int): Array<Array<Region>> {
         val map = Array(dimx) { Array(dimy) { Region(0, 0, 0) } }
 
@@ -111,27 +110,6 @@ object Day22 {
         return map
     }
 
-    private fun printMap(map: Array<Array<Region>>) {
-        for (y in 0..target.y) {
-            for (x in 0..target.x) {
-                if (x == 0 && y == 0) {
-                    print("M")
-                } else if (x == target.x && y == target.y) {
-                    print("T")
-                } else {
-                    val ch = when (map[x][y].type) {
-                        0 -> '.'
-                        1 -> '='
-                        2 -> '|'
-                        else -> '?'
-                    }
-                    print(ch)
-                }
-            }
-            println()
-        }
-    }
-
     private fun parseInput() {
         this.javaClass.getResourceAsStream("aoc18/day22/input.txt")
             .bufferedReader().forEachLine { line ->
@@ -145,7 +123,6 @@ object Day22 {
                         )
                     }
             }
-        println("depth: $depth, target: $target")
     }
 
     data class Pos(val x: Int, val y: Int)

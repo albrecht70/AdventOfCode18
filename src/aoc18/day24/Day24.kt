@@ -4,21 +4,31 @@ object Day24 {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
-        teil2()
+        part1()
+        part2()
     }
 
-    val immuneArmy = mutableListOf<Group>()
-    val infectionArmy = mutableListOf<Group>()
+    private val immuneArmy = mutableListOf<Group>()
+    private val infectionArmy = mutableListOf<Group>()
 
-    private fun teil2() {
+    private fun part1() {
+        parseInput()
 
+        while (immuneArmy.sumBy { a -> a.units } > 0 && infectionArmy.sumBy { a -> a.units } > 0) {
+            val attacks = mutableMapOf<Group, Attack>()
+            findOpponents(immuneArmy, infectionArmy, attacks)
+            findOpponents(infectionArmy, immuneArmy, attacks)
+            doAttack(attacks)
+        }
+        println("Part1: ${infectionArmy.sumBy { a -> a.units }}")
+    }
+
+    private fun part2() {
         var boost = 0
         do {
             parseInput(boost)
 
             while (immuneArmy.sumBy { a -> a.units } > 0 && infectionArmy.sumBy { a -> a.units } > 0) {
-
                 val attacks = mutableMapOf<Group, Attack>()
                 findOpponents(immuneArmy, infectionArmy, attacks)
                 findOpponents(infectionArmy, immuneArmy, attacks)
@@ -27,23 +37,11 @@ object Day24 {
             println("Boost: $boost - Immune System: ${immuneArmy.sumBy { a -> a.units }} - Infection: ${infectionArmy.sumBy { a -> a.units }}")
             boost++
         } while (immuneArmy.sumBy { a -> a.units } == 0)
+
+        println("Part2: ${immuneArmy.sumBy { a -> a.units }}")
     }
 
-    private fun teil1() {
-        parseInput()
-
-        while (immuneArmy.sumBy { a -> a.units } > 0 && infectionArmy.sumBy { a -> a.units } > 0) {
-
-            val attacks = mutableMapOf<Group, Attack>()
-            findOpponents(immuneArmy, infectionArmy, attacks)
-            findOpponents(infectionArmy, immuneArmy, attacks)
-            doAttack(attacks)
-
-            println("Immune System: ${immuneArmy.sumBy { a -> a.units }} - Infection: ${infectionArmy.sumBy { a -> a.units }}")
-        }
-    }
-
-    private fun doAttack(attacks: MutableMap<Group, Attack>) {
+    private fun doAttack(attacks: Map<Group, Attack>) {
         attacks.entries.sortedByDescending { e -> e.key.initiative }.stream().filter { it.key.units > 0 }
             .forEach { e ->
                 val attack = Attack(e.key, e.value.opponent)
@@ -52,11 +50,7 @@ object Day24 {
             }
     }
 
-    private fun findOpponents(
-        attacker: MutableList<Group>,
-        opponents: MutableList<Group>,
-        attacks: MutableMap<Group, Attack>
-    ) {
+    private fun findOpponents(attacker: List<Group>, opponents: List<Group>, attacks: MutableMap<Group, Attack>) {
         val groups = opponents.filter { it.units > 0 }.toMutableList()
 
         attacker.filter { it.units > 0 }
@@ -70,12 +64,12 @@ object Day24 {
             }
     }
 
-    val unitRegex = "^([0-9]*) units".toRegex()
-    val hitRegex = " ([0-9]*) hit points".toRegex()
-    val immuneToRegex = "immune to ([a-z]+)[, ]*([a-z]*)[, ]*([a-z]*)".toRegex()
-    val weakToRegex = "weak to ([a-z]+)[, ]*([a-z]*)[, ]*([a-z]*)".toRegex()
-    val attackRegex = " ([0-9]*) ([a-z]*) damage".toRegex()
-    val initiativeRegex = "initiative ([0-9]*)".toRegex()
+    private val unitRegex = "^([0-9]*) units".toRegex()
+    private val hitRegex = " ([0-9]*) hit points".toRegex()
+    private val immuneToRegex = "immune to ([a-z]+)[, ]*([a-z]*)[, ]*([a-z]*)".toRegex()
+    private val weakToRegex = "weak to ([a-z]+)[, ]*([a-z]*)[, ]*([a-z]*)".toRegex()
+    private val attackRegex = " ([0-9]*) ([a-z]*) damage".toRegex()
+    private val initiativeRegex = "initiative ([0-9]*)".toRegex()
 
     private fun parseInput(boost: Int = 0) {
         immuneArmy.clear()

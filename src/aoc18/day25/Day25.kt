@@ -4,12 +4,12 @@ object Day25 {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1()
+        part1()
     }
 
     private val fixPoints = mutableListOf<Point>()
 
-    private fun teil1() {
+    private fun part1() {
         parseInput()
 
         val rest = mutableListOf<Point>()
@@ -31,9 +31,8 @@ object Day25 {
                 constellations.removeAll(foundConsts)
                 constellations.add(foundConsts.flatten().toMutableList())
             }
-            println("remain: #${rest.size} - constellations #${constellations.size}")
         }
-        println("constellations: #${constellations.size}")
+        println("Part1: constellations: #${constellations.size}")
     }
 
     private fun parseInput() {

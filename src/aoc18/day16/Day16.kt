@@ -2,50 +2,20 @@ object Day16 {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        teil1u2()
+        part1and2()
     }
 
-    private val regexBefore = "Before: \\[(.*)]".toRegex()
-    private val regexInstr = "^([0-9].*[0-9])$".toRegex()
-    private val regexAfter = "After:  \\[(.*)]".toRegex()
+    private val samples = mutableListOf<Sample>()
+    private val program = mutableListOf<IntArray>()
 
-    val samples = mutableListOf<Sample>()
-    val instrs = listOf(
+    private val instrs = listOf(
         Addr(), Addi(), Mulr(), Muli(),
         Banr(), Bani(), Borr(), Bori(), Setr(), Seti(),
         Gtir(), Gtri(), Gtrr(), Eqir(), Eqri(), Eqrr()
     )
 
-    private fun teil1u2() {
-        var currRegexBefore: IntArray? = null
-        var currInstr: IntArray? = null
-        var isTrainingSet = true
-        val program = mutableListOf<IntArray>()
-
-        this.javaClass.getResourceAsStream("aoc18/day16/input.txt")
-            .bufferedReader().forEachLine {
-                if (isTrainingSet && regexBefore.matches(it)) {
-                    currRegexBefore = regexBefore.matchEntire(it)!!.groups[1]!!.value
-                        .split(",").stream().mapToInt { reg -> reg.trim().toInt() }.toArray()
-                }
-                if (regexInstr.matches(it)) {
-                    if (isTrainingSet && currRegexBefore == null) {
-                        isTrainingSet = false
-                    }
-                    currInstr = regexInstr.matchEntire(it)!!.groups[0]!!.value
-                        .split(" ").stream().mapToInt { reg -> reg.trim().toInt() }.toArray()
-                    if (!isTrainingSet) {
-                        program.add(currInstr!!)
-                    }
-                }
-                if (isTrainingSet && regexAfter.matches(it)) {
-                    val currRegexAfter = regexAfter.matchEntire(it)!!.groups[1]!!.value
-                        .split(",").stream().mapToInt { reg -> reg.trim().toInt() }.toArray()
-                    samples.add(Sample(currRegexBefore!!, currInstr!!, currRegexAfter))
-                    currRegexBefore = null
-                }
-            }
-        println("found samples #${samples.size} and registers #${program.size}")
+    private fun part1and2() {
+        parseInput()
 
         val opcodes = mutableMapOf<Int,Instr>()
         while (opcodes.size < 16) {
@@ -67,7 +37,7 @@ object Day16 {
                     opcodes[s.instr[0]] = matches[0]
                 }
             }
-            println("Result count: $resCount")
+            println("Part1: $resCount")
         }
 
         var register = intArrayOf(0, 0, 0, 0)
@@ -75,15 +45,44 @@ object Day16 {
             val instr = opcodes[pi[0]]
             register = instr!!.apply(register, pi)
         }
-        println("Register: ${register.asList()}")
+        println("Part2: register0: ${register[0]}")
     }
 
-    data class Sample(val regBefore: IntArray, val instr: IntArray, val regAfter: IntArray) {
+    private val regexBefore = "Before: \\[(.*)]".toRegex()
+    private val regexInstr = "^([0-9].*[0-9])$".toRegex()
+    private val regexAfter = "After:  \\[(.*)]".toRegex()
 
-        override fun toString(): String {
-            return "${regBefore.asList()} --> ${instr.asList()} --> ${regAfter.asList()}"
-        }
+    private fun parseInput() {
+        var currRegexBefore: IntArray? = null
+        var currInstr: IntArray? = null
+        var isTrainingSet = true
+
+        this.javaClass.getResourceAsStream("aoc18/day16/input.txt")
+            .bufferedReader().forEachLine { line ->
+                if (isTrainingSet && regexBefore.matches(line)) {
+                    currRegexBefore = regexBefore.matchEntire(line)!!.groups[1]!!.value
+                        .split(",").stream().mapToInt { reg -> reg.trim().toInt() }.toArray()
+                }
+                if (regexInstr.matches(line)) {
+                    if (isTrainingSet && currRegexBefore == null) {
+                        isTrainingSet = false
+                    }
+                    currInstr = regexInstr.matchEntire(line)!!.groups[0]!!.value
+                        .split(" ").stream().mapToInt { reg -> reg.trim().toInt() }.toArray()
+                    if (!isTrainingSet) {
+                        program.add(currInstr!!)
+                    }
+                }
+                if (isTrainingSet && regexAfter.matches(line)) {
+                    val currRegexAfter = regexAfter.matchEntire(line)!!.groups[1]!!.value
+                        .split(",").stream().mapToInt { reg -> reg.trim().toInt() }.toArray()
+                    samples.add(Sample(currRegexBefore!!, currInstr!!, currRegexAfter))
+                    currRegexBefore = null
+                }
+            }
     }
+
+    data class Sample(val regBefore: IntArray, val instr: IntArray, val regAfter: IntArray)
 
     abstract class Instr {
         fun apply(register: IntArray, instr: IntArray): IntArray {
